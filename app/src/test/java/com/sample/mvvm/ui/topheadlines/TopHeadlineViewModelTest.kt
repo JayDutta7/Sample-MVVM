@@ -1,0 +1,148 @@
+package com.sample.mvvm.ui.topheadlines
+
+import app.cash.turbine.test
+import com.sample.mvvm.MainCoroutineRule
+import com.sample.mvvm.data.api.FakeNetworkService
+import com.sample.mvvm.data.model.Article
+import com.sample.mvvm.data.model.Source
+import com.sample.mvvm.data.repository.TopHeadlineRepository
+import com.sample.mvvm.ui.base.UiState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.JUnit4
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(JUnit4::class)
+class TopHeadlineViewModelTest {
+
+    @get:Rule
+    val coroutineRule = MainCoroutineRule()
+
+    private val fakeNetworkService = FakeNetworkService()
+    private val repository = TopHeadlineRepository(fakeNetworkService)
+    private lateinit var viewModel: TopHeadlineViewModel
+    private val testDispatcher = coroutineRule.testDispatcher
+
+    @Before
+    fun setup() {
+        viewModel = TopHeadlineViewModel(repository, testDispatcher)
+    }
+
+    @Test
+    fun loadTopHeadlines_emitsLoadingAndSuccessStates() = runTest {
+        // Given
+        val testCountry = "us"
+        val testArticles = listOf(
+            Article(
+                source = Source("1", "Test Source"),
+                author = "Test Author",
+                title = "Test Title",
+                description = "Test Description",
+                url = "https://test.com",
+                urlToImage = "https://test.com/image.jpg",
+                publishedAt = "2023-01-01T00:00:00Z",
+                content = "Test Content"
+            )
+        )
+        fakeNetworkService.setTopHeadlines(testArticles)
+
+        // When & Then
+        viewModel.uiState.test {
+            assertEquals(UiState.Initial, awaitItem())
+            viewModel.loadTopHeadlines(testCountry)
+
+            testDispatcher.scheduler.advanceUntilIdle()
+            awaitItem() as UiState.Loading
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val successState = awaitItem() as UiState.Success
+            assertEquals(testArticles, successState.data)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun loadTopHeadlines_withEmptyCountry_usesDefaultCountry() = runTest {
+        // Given
+        val testArticles = emptyList<Article>()
+        fakeNetworkService.setEmptyTopHeadlines()
+
+        // When & Then
+        viewModel.uiState.test {
+            assertEquals(UiState.Initial, awaitItem())
+
+            viewModel.loadTopHeadlines("")
+
+            awaitItem() as UiState.Loading
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val successState = awaitItem() as UiState.Success
+            assertTrue(successState.data.isEmpty())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun loadTopHeadlines_whenNetworkError_emitsErrorState() = runTest {
+        // Given
+        val testCountry = "us"
+        val errorMessage = "Network error"
+        fakeNetworkService.setError(RuntimeException(errorMessage))
+
+        // When & Then
+        viewModel.uiState.test {
+            assertEquals(UiState.Initial, awaitItem())
+            viewModel.loadTopHeadlines(testCountry)
+
+            awaitItem() as UiState.Loading
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val errorState = awaitItem() as UiState.Error
+            assertEquals(errorMessage, errorState.message)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun loadTopHeadlines_withValidData_verifiesArticleDetails() = runTest {
+        // Given
+        val testArticles = listOf(
+            Article(
+                source = Source("1", "Real Source"),
+                author = "Real Author",
+                title = "Real Title",
+                description = "Real Description",
+                url = "https://real.com",
+                urlToImage = "https://real.com/image.jpg",
+                publishedAt = "2023-01-01T00:00:00Z",
+                content = "Real Content"
+            )
+        )
+        fakeNetworkService.setTopHeadlines(testArticles)
+
+        // When & Then
+        viewModel.uiState.test {
+            assertEquals(UiState.Initial, awaitItem())
+
+            viewModel.loadTopHeadlines("us")
+            awaitItem() as UiState.Loading
+            testDispatcher.scheduler.advanceUntilIdle()
+
+            val successState = awaitItem() as UiState.Success
+            with(successState.data.first()) {
+                assertEquals("Real Title", title)
+                assertEquals("Real Author", author)
+                assertEquals("Real Description", description)
+                assertEquals("https://real.com", url)
+                assertEquals("https://real.com/image.jpg", urlToImage)
+            }
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+}

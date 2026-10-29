@@ -1,0 +1,76 @@
+<resources>
+    <string name="app_name">NewsApp</string>
+    
+    <!-- Language Selection -->
+    <string name="select_language">Select Language</string>
+    <string name="english">English</string>
+    <string name="spanish">Español</string>
+    <string name="french">Français</string>
+    <string name="german">Deutsch</string>
+    <string name="hindi">हिंदी</string>
+    <string name="arabic">العربية</string>
+    <string name="chinese">中文</string>
+    <string name="japanese">日本語</string>
+    <string name="russian">Русский</string>
+    <string name="portuguese">Português</string>
+    
+    <!-- Main Activity Strings -->
+    <string name="hello_world">Hello World!</string>
+    <string name="top_headlines">Top Headlines</string>
+    <string name="news_sources">News Sources</string>
+    <string name="countries">Countries</string>
+    <string name="languages">Languages</string>
+    <string name="search">Search</string>
+    <string name="article_image">Article Image</string>
+    <string name="error_no_internet">No internet connection. Please check your network settings.</string>
+    <string name="error_no_internet_title">No Internet Connection</string>
+    <string name="retry">Retry</string>
+    <string name="action_next">Next</string>
+    <string name="select_country">Select Country</string>
+    
+    <!-- Top Headlines Activity -->
+    <string name="error_loading_news">Error loading news. Please try again later.</string>
+    <string name="no_articles_found">No articles found</string>
+    <string name="error_loading_image">Error loading image</string>
+    <string name="published_on">Published on %1$s</string>
+    
+    <!-- News Sources Activity -->
+    <string name="navigate_back_button_desc">Back</string>
+    <string name="error_loading_sources">Error loading news sources. Please try again later.</string>
+    <string name="no_sources_found">No news sources found</string>
+    <string name="all_categories">All Categories</string>
+    <string name="business">Business</string>
+    <string name="entertainment">Entertainment</string>
+    <string name="general">General</string>
+    <string name="health">Health</string>
+    <string name="science">Science</string>
+    <string name="sports">Sports</string>
+    <string name="technology">Technology</string>
+    
+    <!-- Search Activity -->
+    <string name="search_news">Search News</string>
+    <string name="search_hint">Search for news…</string>
+    
+    <!-- News List Activity -->
+    <string name="filter_news">Filter News</string>
+    <string name="source">Source</string>
+    <string name="country">Country</string>
+    <string name="language">Language</string>
+    <string name="apply">Apply</string>
+    <string name="apply_filters">Apply filters</string>
+    <string name="no_results_found">No news found matching your criteria</string>
+    <string name="empty_state_message">No news to display</string>
+    <string name="error_search_failed">Failed to perform search. Please try again.</string>
+    <string name="error_generic">An error occurred</string>
+    <string name="error_loading_languages">Error loading languages</string>
+    <string name="error_loading_content">Error loading content</string>
+
+    
+    <!-- Language Selection -->
+    <string name="select_up_to_two_languages">Select up to 2 languages</string>
+    <string name="selected_languages">Selected: %1$s</string>
+    <string name="max_languages_selected">You can select up to 2 languages</string>
+    <string name="action_done">Done</string>
+    <string name="error_loading_countries">Error loading countries</string>
+    <string name="no_countries_available">No countries available.</string>
+</resources>
