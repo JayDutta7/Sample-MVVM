@@ -7,20 +7,24 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Repository for accessing language data.
+ * Repository providing access to supported news filtering languages.
  *
- * This class provides a list of supported languages for the application.
- * It is a Singleton, meaning only one instance of this class will exist.
+ * **Architecture Role:**
+ * Acts as the data abstraction providing language selection options to [com.sample.mvvm.ui.languages.LanguagesViewModel].
  *
- * @property context The application context, injected by Hilt.
+ * **Implementation Decisions:**
+ * Managed as a Hilt `@Singleton` exposing a cold [Flow] to provide a consistent reactive interface.
  */
 @Singleton
 class LanguagesRepository @Inject constructor() {
+
+    /** Emits the supported [Language] options as a Flow stream. */
     fun getLanguages(): Flow<List<Language>> = flow {
         emit(languagesList)
     }
 
     companion object {
+        /** Predefined list of supported filtering languages. */
         val languagesList = listOf(
             Language("en", "English", "English", "🇬🇧"),
             Language("es", "Spanish", "Español", "🇪🇸"),

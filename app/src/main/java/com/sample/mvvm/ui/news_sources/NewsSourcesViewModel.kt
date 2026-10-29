@@ -15,6 +15,12 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel managing UI state for [NewsSourcesScreen].
+ *
+ * **Architecture Role:**
+ * Retrieves news publishers from [NewsSourcesRepository] and exposes `StateFlow<UiState<List<Source>>>`.
+ */
 @HiltViewModel
 class NewsSourcesViewModel @Inject constructor(
     private val repository: NewsSourcesRepository,
@@ -22,8 +28,13 @@ class NewsSourcesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _newsSources = MutableStateFlow<UiState<List<Source>>>(UiState.Initial)
+    
+    /** Observable state flow for news publisher sources. */
     val newsSources: StateFlow<UiState<List<Source>>> = _newsSources
 
+    /**
+     * Asynchronously loads publisher sources from the remote API via [NewsSourcesRepository].
+     */
     fun loadNewsSources() {
         viewModelScope.launch {
             _newsSources.value = UiState.Loading

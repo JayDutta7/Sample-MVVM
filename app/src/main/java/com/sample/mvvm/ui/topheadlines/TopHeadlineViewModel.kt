@@ -16,6 +16,12 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel managing UI state for [TopHeadlinesScreen].
+ *
+ * **Architecture Role:**
+ * Interacts with [TopHeadlineRepository] to retrieve top headline articles for a selected country region.
+ */
 @HiltViewModel
 class TopHeadlineViewModel @Inject constructor(
     private val repository: TopHeadlineRepository,
@@ -23,8 +29,13 @@ class TopHeadlineViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState<List<Article>>>(UiState.Initial)
+    
+    /** Observable state flow emitting top headline articles. */
     val uiState: StateFlow<UiState<List<Article>>> = _uiState
 
+    /**
+     * Loads top headline news for the specified country (defaults to "us").
+     */
     fun loadTopHeadlines(country: String = COUNTRY) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading

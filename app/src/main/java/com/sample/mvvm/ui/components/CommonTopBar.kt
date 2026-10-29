@@ -20,19 +20,16 @@ import androidx.compose.ui.unit.dp
 import com.sample.mvvm.R
 
 /**
- * Creates a common top app bar with centered title, back navigation, and optional actions.
+ * Standardized Material 3 centered top app bar component.
  *
- * This composable function generates a [CenterAlignedTopAppBar] with a customizable title,
- * back navigation button, and optional action buttons. It uses Material 3 design components
- * and applies the provided theme colors.
+ * **Architecture Role:**
+ * Reusable header toolbar providing consistent title typography, primary theme colors,
+ * back button navigation icon, and custom action button slots.
  *
- * @param text The text to be displayed as the title in the top app bar.
- * @param onBackClick A lambda function to be invoked when the back button is clicked.
- * @param actions An optional composable lambda that defines additional action buttons
- *                to be displayed in the top app bar. Defaults to an empty lambda.
- * @param theme The [MaterialTheme] to be applied to the top app bar for consistent styling.
- *
- * @return A composable [CenterAlignedTopAppBar] with the specified properties.
+ * @param text Header title text string displayed in center alignment.
+ * @param actions Composable action items appended to the right side of the toolbar.
+ * @param onBackClick Optional back arrow click listener. Displays back button when non-null.
+ * @param theme MaterialTheme instance providing theme color tokens.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,12 +39,11 @@ fun CommonTopBar(
     onBackClick: (() -> Unit)? = null,
     theme: MaterialTheme = MaterialTheme
 ) {
-
     CenterAlignedTopAppBar(
         title = {
             Column(modifier = Modifier.padding(top = 16.dp)) {
                 Text(
-                    text,
+                    text = text,
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold
                 )

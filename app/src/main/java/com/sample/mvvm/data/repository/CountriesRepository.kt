@@ -7,17 +7,28 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Repository for accessing a static list of countries.
- * This class provides a Flow of Country objects, which can be observed for changes.
- * The list of countries is predefined and does not change.
+ * Repository providing access to the static predefined list of supported countries.
+ *
+ * **Architecture Role:**
+ * Serves as the single source of truth for supported country filtering options in MVVM data layer,
+ * decoupling UI components from hardcoded list definitions.
+ *
+ * **Implementation Decisions:**
+ * - Annotated `@Singleton` and `@Inject constructor()` for automatic Hilt lifecycle management.
+ * - Exposes data as a cold [Flow] to maintain a uniform asynchronous repository interface across the application.
  */
 @Singleton
 class CountriesRepository @Inject constructor() {
+
+    /**
+     * Emits the predefined list of supported [Country] items as a cold Flow stream.
+     */
     fun getCountries(): Flow<List<Country>> = flow {
         emit(countriesList)
     }
 
     companion object {
+        /** In-memory static list of supported countries with flags and ISO codes. */
         val countriesList = listOf(
             Country("ar", "Argentina", "🇦🇷"),
             Country("at", "Austria", "🇦🇹"),

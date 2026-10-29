@@ -37,6 +37,13 @@ import com.sample.mvvm.ui.topheadlines.TopHeadlinesScreen
 import com.sample.mvvm.utils.CustomTabsHelper
 import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * Main Single Activity entry point of the application.
+ *
+ * **Architecture Role:**
+ * Hosts the Jetpack Compose UI container and Navigation Compose [NavHost] for all application screens.
+ * Annotated with [@AndroidEntryPoint][AndroidEntryPoint] to enable Hilt dependency injection.
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +61,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Top-level composable configuring Navigation Compose destinations and routes.
+ */
 @Composable
 fun MyNewsApp() {
     val navController = rememberNavController()
@@ -71,8 +81,8 @@ fun MyNewsApp() {
         composable(Screen.NewsSources.route) {
             NewsSourcesScreen(
                 onBackPressed = { navController.popBackStack() },
-                onSourceClick = {
-                    navController.navigate(Screen.NewsList.route + "?source=$it")
+                onSourceClick = { sourceId ->
+                    navController.navigate("${Screen.NewsList.route}?source=$sourceId")
                 },
             )
         }
@@ -85,7 +95,6 @@ fun MyNewsApp() {
                 source = source,
             )
         }
-
         composable(
             route = "${Screen.NewsList.route}?country={country}"
         ) { backStackEntry ->
@@ -95,7 +104,6 @@ fun MyNewsApp() {
                 country = country,
             )
         }
-
         composable(
             route = "${Screen.NewsList.route}?language={language}"
         ) { backStackEntry ->
@@ -110,14 +118,16 @@ fun MyNewsApp() {
                 onBackClick = { navController.popBackStack() },
                 onCountryClick = { country ->
                     navController.navigate("${Screen.NewsList.route}?country=${country.code.lowercase()}")
-                })
+                }
+            )
         }
         composable(Screen.Languages.route) {
             LanguagesScreen(
                 onBackPressed = { navController.popBackStack() },
                 onDoneClicked = { language ->
                     navController.navigate("${Screen.NewsList.route}?language=${language.lowercase()}")
-                })
+                }
+            )
         }
         composable(Screen.Search.route) {
             SearchScreen(
@@ -127,6 +137,9 @@ fun MyNewsApp() {
     }
 }
 
+/**
+ * Dashboard main screen composable featuring menu navigation buttons.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavController) {
@@ -135,7 +148,8 @@ fun MainScreen(navController: NavController) {
             CommonTopBar(
                 text = LocalContext.current.resources.getString(R.string.app_name)
             )
-        }) { padding ->
+        }
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -173,6 +187,7 @@ fun MainScreen(navController: NavController) {
     }
 }
 
+/** Reusable styled dashboard button for navigation. */
 @Composable
 fun MainScreenButton(
     text: String, screen: Screen, navController: NavController

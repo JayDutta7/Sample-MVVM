@@ -15,6 +15,17 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel managing UI state for [CountrySourcesScreen].
+ *
+ * **Architecture Role:**
+ * Requests country selection options from [CountriesRepository] and exposes `StateFlow<UiState<List<Country>>>`
+ * to the Compose UI layer.
+ *
+ * **Implementation Decisions:**
+ * - Injects [CountriesRepository] and I/O [CoroutineDispatcher] via Hilt `@HiltViewModel`.
+ * - Sorts countries alphabetically by localized name before emitting [UiState.Success].
+ */
 @HiltViewModel
 class CountrySourcesViewModel @Inject constructor(
     private val countriesRepository: CountriesRepository,
@@ -22,12 +33,17 @@ class CountrySourcesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _countries = MutableStateFlow<UiState<List<Country>>>(UiState.Initial)
+    
+    /** Observable state flow representing country list loading status and data. */
     val countries: StateFlow<UiState<List<Country>>> = _countries
 
     init {
         loadCountries()
     }
 
+    /**
+     * Loads and sorts the list of countries alphabetically by display name.
+     */
     fun loadCountries() {
         viewModelScope.launch {
             _countries.value = UiState.Loading

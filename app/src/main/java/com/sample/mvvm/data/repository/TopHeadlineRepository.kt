@@ -7,15 +7,26 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
+/**
+ * Repository responsible for retrieving top headlines.
+ *
+ * **Architecture Role:**
+ * Supplies headline streams to [com.sample.mvvm.ui.topheadlines.TopHeadlineViewModel].
+ *
+ * @property networkService Injected Retrofit API client.
+ */
 @Singleton
 class TopHeadlineRepository @Inject constructor(
-    private val networkService: NetworkService,
+    private val networkService: NetworkService
 ) {
+    /**
+     * Fetches top headline news articles for a specified country code.
+     *
+     * @param country ISO country code (e.g., "us").
+     * @return Flow emitting list of top headline [Article] items.
+     */
     fun getTopHeadlines(country: String): Flow<List<Article>> = flow {
-        // Perform API call and map the response to a list of articles
         val articles = networkService.getTopHeadlines(country).articles
-        // Emit the list of articles as a Flow
         emit(articles)
     }
 }

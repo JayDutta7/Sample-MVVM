@@ -10,18 +10,19 @@ import com.sample.mvvm.R
 import com.sample.mvvm.ui.base.UiState
 
 /**
- * A composable function that creates a common network screen with various states handling.
+ * Reusable, strongly-typed generic screen container handling asynchronous [UiState] transitions.
  *
- * This function sets up a scaffold with a top bar and handles different UI states
- * (Initial, Success, Loading, Error) based on the provided [uiState].
+ * **Architecture Role:**
+ * Encapsulates Scaffold layout, top bar rendering, and declarative state switching ([UiState.Initial],
+ * [UiState.Loading], [UiState.Success], and [UiState.Error]) across all primary feature screens.
  *
- * @param title The title to be displayed in the top bar.
- * @param uiState The current UI state of type [UiState<T>] that determines which composable to display.
- * @param onBackPressed A lambda function to be invoked when the back button is pressed.
- * @param onRetry An optional lambda function to be invoked when retry is requested in the error state.
- * @param actions A composable function that defines additional actions in the top bar.
- * @param onInitial A composable function to be invoked when the UI state is Initial.
- * @param onSuccess A composable function to be invoked when the UI state is Success, passing strongly-typed data.
+ * @param title Top app bar header text.
+ * @param uiState Observable screen UI state of type [UiState<T>].
+ * @param onBackPressed Optional back button click callback handler.
+ * @param onRetry Optional callback invoked when the user taps "Retry" on error screens.
+ * @param actions Composable action slot for top app bar icons.
+ * @param onInitial Content composable rendered during [UiState.Initial].
+ * @param onSuccess Content composable rendered during [UiState.Success], receiving strongly-typed payload data.
  */
 @Composable
 fun <T> CommonNetworkScreen(
@@ -45,7 +46,7 @@ fun <T> CommonNetworkScreen(
         val modifier = Modifier.padding(padding)
         when (uiState) {
             is UiState.Initial -> {
-                onInitial(modifier = modifier)
+                onInitial(modifier)
             }
 
             is UiState.Success -> {
