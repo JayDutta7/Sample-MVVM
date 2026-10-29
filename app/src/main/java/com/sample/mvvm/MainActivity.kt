@@ -44,7 +44,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             NewsAppTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     MyNewsApp()
                 }
@@ -55,7 +56,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MyNewsApp() {
-    val navController = rememberNavController() // NavController is created here
+    val navController = rememberNavController()
     val context = LocalContext.current
     NavHost(navController = navController, startDestination = Screen.Main.route) {
         composable(Screen.Main.route) {
@@ -119,7 +120,9 @@ fun MyNewsApp() {
                 })
         }
         composable(Screen.Search.route) {
-            SearchScreen()
+            SearchScreen(
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }
@@ -130,8 +133,7 @@ fun MainScreen(navController: NavController) {
     Scaffold(
         topBar = {
             CommonTopBar(
-                text = LocalContext.current.resources.getString(R.string.app_name),
-                theme = MaterialTheme
+                text = LocalContext.current.resources.getString(R.string.app_name)
             )
         }) { padding ->
         Column(
@@ -185,9 +187,10 @@ fun MainScreenButton(
                 restoreState = true
             }
         }, modifier = Modifier
-            .fillMaxWidth(0.85f)  // 85% width (15% margin on each side)
-            .height(56.dp * 1.2f)  // 20% taller than default Material button height
-            .padding(vertical = 8.dp), shape = MaterialTheme.shapes.medium,  // Rounded corners
+            .fillMaxWidth(0.85f)
+            .height(56.dp * 1.2f)
+            .padding(vertical = 8.dp),
+        shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary

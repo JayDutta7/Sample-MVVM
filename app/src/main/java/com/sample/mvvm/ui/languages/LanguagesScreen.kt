@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,10 +21,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -55,7 +53,7 @@ internal fun LanguagesScreen(
     CommonNetworkScreen(
         title = stringResource(id = R.string.select_language),
         onBackPressed = onBackPressed,
-        uiState = uiState as UiState<Any>,
+        uiState = uiState,
         actions = {
             if (selectedLanguages.isNotEmpty()) {
                 TextButton(
@@ -70,18 +68,16 @@ internal fun LanguagesScreen(
                 }
             }
         },
-        onSuccess = { state, modifier ->
-            val uiState = state as UiState.Success
-            val data = uiState.data as List<Language>
+        onSuccess = { languages, modifier ->
             LanguagesContent(
-                languages = data ?: emptyList(),
+                languages = languages,
                 selectedLanguages = selectedLanguages,
-                onLanguageSelected = {
-                    selectedLanguages = if (it in selectedLanguages) {
-                        selectedLanguages - it
+                onLanguageSelected = { code ->
+                    selectedLanguages = if (code in selectedLanguages) {
+                        selectedLanguages - code
                     } else {
                         if (selectedLanguages.size < 2) {
-                            selectedLanguages + it
+                            selectedLanguages + code
                         } else {
                             selectedLanguages
                         }
@@ -89,8 +85,7 @@ internal fun LanguagesScreen(
                 },
                 modifier = modifier
             )
-        },
-        theme = MaterialTheme,
+        }
     )
 }
 

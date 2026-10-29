@@ -1,10 +1,5 @@
 package com.sample.mvvm.ui.newslist
 
-import android.content.Context
-import android.content.Intent
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,14 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -46,55 +40,6 @@ import com.sample.mvvm.ui.components.EmptyState
 import com.sample.mvvm.ui.theme.NewsAppTheme
 import com.sample.mvvm.utils.CustomTabsHelper
 import com.sample.mvvm.utils.formatDate
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
-class NewsListActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        val source = intent.getStringExtra(EXTRA_SOURCE)
-        val country = intent.getStringExtra(EXTRA_COUNTRY)
-        val language = intent.getStringExtra(EXTRA_LANGUAGE)
-
-        setContent {
-            NewsAppTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    NewsListScreen(
-                        source = source,
-                        country = country,
-                        language = language,
-                        onBackClick = { onBackPressed() }
-                    )
-                }
-            }
-        }
-    }
-
-    companion object {
-        private const val EXTRA_SOURCE = "extra_source"
-        private const val EXTRA_COUNTRY = "extra_country"
-        private const val EXTRA_LANGUAGE = "extra_language"
-
-        fun start(
-            context: Context,
-            source: String? = null,
-            country: String? = null,
-            language: String? = null
-        ) {
-            val intent = Intent(context, NewsListActivity::class.java).apply {
-                putExtra(EXTRA_SOURCE, source)
-                putExtra(EXTRA_COUNTRY, country)
-                putExtra(EXTRA_LANGUAGE, language)
-            }
-            context.startActivity(intent)
-        }
-    }
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,29 +60,24 @@ fun NewsListScreen(
     CommonNetworkScreen(
         title = stringResource(id = R.string.news_sources),
         onBackPressed = onBackClick,
-        uiState = uiState as UiState<Any>,
+        uiState = uiState,
         onRetry = { viewModel.loadNews(source, country, language) },
-        onSuccess = { state, modifier ->
-            val uiState = state as UiState.Success
-            val data = uiState.data as List<Article>
-            data.let { sources ->
-                if (sources.isNotEmpty()) {
-                    NewsList(
-                        articles = sources,
-                        onArticleClick = { article ->
-                            CustomTabsHelper.launchUrl(context, article.url)
-                        },
-                        modifier = modifier
-                    )
-                } else {
-                    EmptyState(
-                        message = stringResource(id = R.string.no_sources_found),
-                        modifier = modifier
-                    )
-                }
+        onSuccess = { articles, modifier ->
+            if (articles.isNotEmpty()) {
+                NewsList(
+                    articles = articles,
+                    onArticleClick = { article ->
+                        CustomTabsHelper.launchUrl(context, article.url)
+                    },
+                    modifier = modifier
+                )
+            } else {
+                EmptyState(
+                    message = stringResource(id = R.string.no_sources_found),
+                    modifier = modifier
+                )
             }
-        },
-        theme = MaterialTheme,
+        }
     )
 }
 
@@ -224,8 +164,6 @@ fun NewsArticleItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
-
             }
         }
     }
@@ -250,4 +188,3 @@ fun NewsArticleItemPreview() {
         )
     }
 }
-

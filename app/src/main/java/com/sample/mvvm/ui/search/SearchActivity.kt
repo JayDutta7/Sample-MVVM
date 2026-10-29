@@ -1,8 +1,5 @@
 package com.sample.mvvm.ui.search
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,14 +27,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -61,42 +55,18 @@ import com.sample.mvvm.ui.components.ErrorAndRetryState
 import com.sample.mvvm.ui.components.LoadingIndicator
 import com.sample.mvvm.ui.theme.NewsAppTheme
 import com.sample.mvvm.utils.CustomTabsHelper
-import dagger.hilt.android.AndroidEntryPoint
 
-
-/**
- * Composable function for the search screen.
- * It allows users to search for news articles and displays the results.
- *
- * This screen includes:
- * - A top bar with a back button and the title "Search News".
- * - A search bar that allows users to input their search query. The search bar automatically
- *   requests focus when the screen is first displayed.
- * - A content area that displays different states based on the search operation:
- *     - [UiState.Loading]: Shows a loading indicator while fetching results.
- *     - [UiState.Success]:
- *         - If results are empty, displays an [EmptySearchResults] message.
- *         - Otherwise, displays a list of [SearchResults]. Clicking an article
- *           opens it in a custom tab.
- *     - [UiState.Error]: Shows an [ErrorAndRetryState] with an error message and a retry button.
- *     - [UiState.Initial]: Shows an [InitialSearchHint] prompting the user to start searching.
- *
- * The search query is managed by the [SearchViewModel] and updates reactively.
- *
- * @param viewModel The [SearchViewModel] instance used to manage the state and logic of the search screen.
- *                  It is provided by Hilt.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
+    onBackClick: (() -> Unit)? = null,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var searchQuery by remember { mutableStateOf("") }
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val focusRequester = remember { FocusRequester() }
     val context = LocalContext.current
 
-    // Request focus when the screen is first displayed
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
     }
@@ -105,36 +75,25 @@ fun SearchScreen(
         topBar = {
             CommonTopBar(
                 text = stringResource(R.string.search_news),
-                onBackClick = {
-                    (context as? ComponentActivity)?.onBackPressed()
-                },
-                theme = MaterialTheme,
+                onBackClick = onBackClick
             )
         }
-
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Search Bar
             SearchBar(
                 query = searchQuery,
-                onQueryChange = {
-                    searchQuery = it
-                    viewModel.setSearchQuery(searchQuery)
-                },
-                onClear = {
-                    searchQuery = ""
-                },
+                onQueryChange = { viewModel.setSearchQuery(it) },
+                onClear = { viewModel.setSearchQuery("") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
                     .focusRequester(focusRequester)
             )
 
-            // Content based on state
             when (val state = uiState) {
                 is UiState.Loading -> {
                     LoadingIndicator(Modifier.padding(padding))
@@ -163,7 +122,6 @@ fun SearchScreen(
                 }
 
                 is UiState.Initial -> {
-                    // Initial empty state with search hint
                     InitialSearchHint()
                 }
             }
@@ -181,9 +139,7 @@ private fun SearchBar(
 ) {
     OutlinedTextField(
         value = query,
-        onValueChange = { newValue ->
-            onQueryChange(newValue)
-        },
+        onValueChange = onQueryChange,
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp),
@@ -272,7 +228,7 @@ private fun SearchResultItem(
             }
 
             Text(
-                text = article.title ?: "",
+                text = article.title,
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,
@@ -298,12 +254,12 @@ private fun SearchResultItem(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = article.source?.name ?: "",
+                    text = article.source.name ?: "",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                article.publishedAt?.let { date ->
+                article.publishedAt.let { date ->
                     Text(
                         text = formatDate(date),
                         style = MaterialTheme.typography.labelSmall,
@@ -364,9 +320,8 @@ private fun InitialSearchHint() {
 }
 
 private fun formatDate(dateString: String): String {
-    // This is a simple formatter - replace with your actual date formatting logic
     return try {
-        dateString.substring(0, 10) // Just show YYYY-MM-DD for now
+        dateString.substring(0, 10)
     } catch (e: Exception) {
         dateString
     }
@@ -388,8 +343,8 @@ fun SearchResultItemPreview() {
             article = Article(
                 source = Source("source-id", "CNN"),
                 author = "John Doe",
-                title = "Sample News Article Title That Can Be Quite Long and Might Wrap to Multiple Lines",
-                description = "This is a sample news article description that provides a brief summary of the article content. It can be longer and might wrap to multiple lines.",
+                title = "Sample News Article Title",
+                description = "This is a sample news article description.",
                 url = "https://example.com",
                 urlToImage = "https://picsum.photos/800/450",
                 publishedAt = "2023-06-09T12:34:56Z",

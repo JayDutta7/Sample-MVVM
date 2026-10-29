@@ -52,30 +52,24 @@ internal fun TopHeadlinesScreen(
         onBackPressed = onBackPressed,
         uiState = uiState,
         onRetry = { viewModel.loadTopHeadlines() },
-        onSuccess = { state, modifier ->
-            val uiState = state as UiState.Success
-            val data = uiState.data as List<Article>
-            uiState.data.let { sources ->
-                if (sources.isNotEmpty()) {
-                    ArticleList(
-                        articles = uiState.data,
-                        modifier = modifier,
-                        onArticleClick = { article ->
-                            onArticleClick(article.url)
-                        }
-                    )
-                } else {
-                    EmptyState(
-                        message = stringResource(id = R.string.no_sources_found),
-                        modifier = modifier
-                    )
-                }
+        onSuccess = { articles, modifier ->
+            if (articles.isNotEmpty()) {
+                ArticleList(
+                    articles = articles,
+                    modifier = modifier,
+                    onArticleClick = { article ->
+                        onArticleClick(article.url)
+                    }
+                )
+            } else {
+                EmptyState(
+                    message = stringResource(id = R.string.no_sources_found),
+                    modifier = modifier
+                )
             }
-        },
-        theme = MaterialTheme,
+        }
     )
 }
-
 
 @Composable
 fun ArticleList(
@@ -84,10 +78,7 @@ fun ArticleList(
     onArticleClick: (Article) -> Unit = {}
 ) {
     LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-//            .padding(16.dp)
-        ,
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(articles, key = { it.url }) { article ->
@@ -98,7 +89,6 @@ fun ArticleList(
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -112,8 +102,7 @@ private fun ArticleItem(
         .clip(RoundedCornerShape(4.dp))
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {

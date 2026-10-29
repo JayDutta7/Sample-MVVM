@@ -35,7 +35,6 @@ import com.sample.mvvm.ui.components.CommonNetworkScreen
 import com.sample.mvvm.ui.components.EmptyState
 import com.sample.mvvm.ui.theme.NewsAppTheme
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun NewsSourcesScreen(
@@ -43,7 +42,6 @@ internal fun NewsSourcesScreen(
     onSourceClick: (String) -> Unit,
     viewModel: NewsSourcesViewModel = hiltViewModel()
 ) {
-
     val uiState by viewModel.newsSources.collectAsStateWithLifecycle()
     LaunchedEffect(uiState) {
         if (uiState is UiState.Initial) {
@@ -53,30 +51,24 @@ internal fun NewsSourcesScreen(
     CommonNetworkScreen(
         title = stringResource(id = R.string.news_sources),
         onBackPressed = onBackPressed,
-        uiState = uiState as UiState<Any>,
+        uiState = uiState,
         onRetry = { viewModel.loadNewsSources() },
-        onSuccess = { state, modifier ->
-            val uiState = state as UiState.Success
-            val data = uiState.data as List<Source>
-            data.let { sources ->
-                if (sources.isNotEmpty()) {
-                    NewsSourcesList(
-                        sources = sources,
-                        onSourceClick = { source -> onSourceClick(source.id.toString()) },
-                        modifier = modifier
-                    )
-                } else {
-                    EmptyState(
-                        message = stringResource(id = R.string.no_sources_found),
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
+        onSuccess = { sources, modifier ->
+            if (sources.isNotEmpty()) {
+                NewsSourcesList(
+                    sources = sources,
+                    onSourceClick = { source -> onSourceClick(source.id.toString()) },
+                    modifier = modifier
+                )
+            } else {
+                EmptyState(
+                    message = stringResource(id = R.string.no_sources_found),
+                    modifier = Modifier.padding(16.dp)
+                )
             }
-        },
-        theme = MaterialTheme,
+        }
     )
 }
-
 
 @Composable
 private fun NewsSourcesList(
@@ -93,73 +85,6 @@ private fun NewsSourcesList(
             NewsSourceItem(
                 source = source,
                 onClick = { onSourceClick(source) }
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun NewsSourcesListPreview() {
-    val sampleSources = listOf(
-        Source(
-            id = "abc-news",
-            name = "ABC News",
-            description = "Your trusted source for breaking news, analysis, exclusive interviews, and videos at ABCNews.com.",
-            url = "https://abcnews.go.com",
-            category = "general",
-            language = "en",
-            country = "us"
-        ),
-        Source(
-            id = "bbc-news",
-            name = "BBC News",
-            description = "Use BBC News for up-to-the-minute news, breaking news, video, audio and feature stories.",
-            url = "https://www.bbc.co.uk/news",
-            category = "general",
-            language = "en",
-            country = "gb"
-        ),
-        Source(
-            id = "cnn",
-            name = "CNN",
-            description = "View the latest news and breaking news today for U.S., world, weather, entertainment, politics and health at CNN.com.",
-            url = "https://www.cnn.com",
-            category = "general",
-            language = "en",
-            country = "us"
-        )
-    )
-
-    NewsAppTheme {
-        Surface {
-            NewsSourcesList(
-                sources = sampleSources,
-                onSourceClick = {},
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun NewsSourceItemPreview() {
-    val sampleSource = Source(
-        id = "abc-news",
-        name = "ABC News",
-        description = "Your trusted source for breaking news, analysis, exclusive interviews, and videos at ABCNews.com.",
-        url = "https://abcnews.go.com",
-        category = "general",
-        language = "en",
-        country = "us"
-    )
-
-    NewsAppTheme {
-        Surface {
-            NewsSourceItem(
-                source = sampleSource,
-                onClick = {}
             )
         }
     }
@@ -212,6 +137,32 @@ private fun NewsSourceItem(
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NewsSourcesListPreview() {
+    val sampleSources = listOf(
+        Source(
+            id = "abc-news",
+            name = "ABC News",
+            description = "Your trusted source for breaking news, analysis, exclusive interviews, and videos at ABCNews.com.",
+            url = "https://abcnews.go.com",
+            category = "general",
+            language = "en",
+            country = "us"
+        )
+    )
+
+    NewsAppTheme {
+        Surface {
+            NewsSourcesList(
+                sources = sampleSources,
+                onSourceClick = {},
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }

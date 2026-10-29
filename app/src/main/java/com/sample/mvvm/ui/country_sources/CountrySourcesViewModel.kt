@@ -10,21 +10,16 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * View model for [CountrySourcesActivity]
- *
- * @author Gaurav Bajaj
- */
 @HiltViewModel
 class CountrySourcesViewModel @Inject constructor(
-    val countriesRepository: CountriesRepository,
-    @BackgroundContext val dispatcher: CoroutineDispatcher
-) :
-    ViewModel() {
+    private val countriesRepository: CountriesRepository,
+    @BackgroundContext private val dispatcher: CoroutineDispatcher
+) : ViewModel() {
 
     private val _countries = MutableStateFlow<UiState<List<Country>>>(UiState.Initial)
     val countries: StateFlow<UiState<List<Country>>> = _countries
@@ -35,15 +30,16 @@ class CountrySourcesViewModel @Inject constructor(
 
     fun loadCountries() {
         viewModelScope.launch {
-            try {
-                _countries.value = UiState.Loading
-                countriesRepository.getCountries().flowOn(dispatcher).collect { countriesList ->
-                    countriesList.sortedBy { it.name }
-                    _countries.value = UiState.Success(countriesList)
+            _countries.value = UiState.Loading
+            countriesRepository.getCountries()
+                .flowOn(dispatcher)
+                .catch { e ->
+                    _countries.value = UiState.Error(e.message ?: "Unknown error occurred")
                 }
-            } catch (e: Exception) {
-                _countries.value = UiState.Error(e.message ?: "Unknown error occurred")
-            }
+                .collect { countriesList ->
+                    val sortedList = countriesList.sortedBy { it.name }
+                    _countries.value = UiState.Success(sortedList)
+                }
         }
     }
 }

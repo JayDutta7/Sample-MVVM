@@ -1,16 +1,12 @@
 package com.sample.mvvm.di.module
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.sample.mvvm.data.api.NetworkService
-import com.sample.mvvm.data.repository.NewsRepository
-import com.sample.mvvm.data.repository.NewsSourcesRepository
-import com.sample.mvvm.data.repository.SearchRepository
-import com.sample.mvvm.data.repository.TopHeadlineRepository
 import com.sample.mvvm.di.BackgroundContext
 import com.sample.mvvm.di.BaseUrl
 import com.sample.mvvm.di.MainContext
 import com.sample.mvvm.utils.AppConstant.API_KEY
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,7 +22,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class ApplicationModule() {
+object ApplicationModule {
 
     @BaseUrl
     @Provides
@@ -38,23 +34,16 @@ class ApplicationModule() {
 
     @Provides
     @Singleton
-    fun provideGsonConverterFactory(): GsonConverterFactory = GsonConverterFactory.create()
+    fun provideGsonConverterFactory(gson: Gson): GsonConverterFactory = GsonConverterFactory.create(gson)
 
     @Provides
     @Singleton
     fun provideApiKeyInterceptor(): Interceptor = Interceptor { chain ->
         val original = chain.request()
-        val originalHttpUrl = original.url
-
-        val url = originalHttpUrl.newBuilder()
+        val url = original.url.newBuilder()
             .addQueryParameter("apiKey", API_KEY)
             .build()
-
-        val requestBuilder = original.newBuilder()
-            .url(url)
-
-        val request = requestBuilder.build()
-        chain.proceed(request)
+        chain.proceed(original.newBuilder().url(url).build())
     }
 
     @Provides
@@ -68,12 +57,6 @@ class ApplicationModule() {
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .build()
-    }
-    @Provides
-    @Singleton
-    fun provideNetworkService(@BaseUrl baseUrl: String, retrofit: Retrofit): NetworkService {
-        return retrofit
-            .create(NetworkService::class.java)
     }
 
     @Provides
@@ -90,32 +73,19 @@ class ApplicationModule() {
             .build()
     }
 
-
     @Provides
     @Singleton
-    fun provideNewsRepository(networkService: NetworkService) = NewsRepository(networkService)
-
-    @Provides
-    @Singleton
-    fun provideNewsSourcesRepository(networkService: NetworkService) =
-        NewsSourcesRepository(networkService)
-
-    @Provides
-    @Singleton
-    fun provideSearchRepository(networkService: NetworkService) = SearchRepository(networkService)
-
-    @Provides
-    @Singleton
-    fun provideTopHeadlineRepository(networkService: NetworkService) =
-        TopHeadlineRepository(networkService)
+    fun provideNetworkService(retrofit: Retrofit): NetworkService {
+        return retrofit.create(NetworkService::class.java)
+    }
 
     @BackgroundContext
     @Provides
     @Singleton
-    fun provideIODispatcher():CoroutineDispatcher = Dispatchers.IO
+    fun provideIODispatcher(): CoroutineDispatcher = Dispatchers.IO
 
     @MainContext
     @Provides
     @Singleton
-    fun provideMainDispatcher():CoroutineDispatcher = Dispatchers.Main
+    fun provideMainDispatcher(): CoroutineDispatcher = Dispatchers.Main
 }

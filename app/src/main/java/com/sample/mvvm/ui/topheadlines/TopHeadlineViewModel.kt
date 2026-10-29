@@ -6,17 +6,15 @@ import com.sample.mvvm.data.model.Article
 import com.sample.mvvm.data.repository.TopHeadlineRepository
 import com.sample.mvvm.di.BackgroundContext
 import com.sample.mvvm.ui.base.UiState
-import com.sample.mvvm.ui.base.UiState.Initial
 import com.sample.mvvm.utils.AppConstant.COUNTRY
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlinx.coroutines.flow.flowOn
 
 @HiltViewModel
 class TopHeadlineViewModel @Inject constructor(
@@ -24,20 +22,20 @@ class TopHeadlineViewModel @Inject constructor(
     @BackgroundContext private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UiState<List<Article>>>(
-        Initial
-    )
+    private val _uiState = MutableStateFlow<UiState<List<Article>>>(UiState.Initial)
     val uiState: StateFlow<UiState<List<Article>>> = _uiState
 
     fun loadTopHeadlines(country: String = COUNTRY) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             repository.getTopHeadlines(country)
-                .onStart { _uiState.value = UiState.Loading }.catch {
-                _uiState.value = UiState.Error(it.message)
-            }.flowOn(dispatcher).collect { articles ->
-                _uiState.value = UiState.Success(articles)
-            }
+                .flowOn(dispatcher)
+                .catch { e ->
+                    _uiState.value = UiState.Error(e.message ?: "An unknown error occurred")
+                }
+                .collect { articles ->
+                    _uiState.value = UiState.Success(articles)
+                }
         }
     }
 }
